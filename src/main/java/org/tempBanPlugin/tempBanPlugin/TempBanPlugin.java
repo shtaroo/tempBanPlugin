@@ -9,10 +9,15 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.time.Instant;
 import java.util.Date;
 
 public final class TempBanPlugin extends JavaPlugin implements Listener {
+    private Connection connection;
 
     @Override
     public void onEnable() {
@@ -20,11 +25,34 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         getLogger().info("TempBanPlugin enabled");
         Bukkit.broadcastMessage("TempBanPlugin is Enabled");
-        File dbDir = new File("/TempBanPlugin");
-        if (!dbDir.exists()) {
-            dbDir.mkdirs();
-        }
 
+        // DATABASE SETUP
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+        File db = new File(getDataFolder(), "playerlog.db");
+        try {
+            if (!db.exists()) {
+                db.createNewFile();
+                getLogger().info("Created new database file: " + db.getAbsolutePath());
+            }
+
+            // CONNECT TO SQLITE
+            String url = "jdbc:sqlite:" + db.getAbsolutePath();
+            connection = DriverManager.getConnection(url);
+            getLogger().info("Connected to SQLite database.");
+
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("create table if not exists deaths (" +
+                    "player string primary key," +
+                    "deaths int," +
+                    ")"
+            );
+            stmt.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @EventHandler
@@ -38,6 +66,7 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
 
         Bukkit.getBanList(BanList.Type.PROFILE)
                 .addBan(player.getName(), reason, expiry, getName());
+
 
         player.kickPlayer("§4§l☠ YOU DIED! ☠ §7You've been set on a §c24 hour §7cooldown.");
 
