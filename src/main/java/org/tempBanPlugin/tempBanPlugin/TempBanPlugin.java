@@ -99,12 +99,6 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
     }
 
     @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-        getLogger().info("TempBanPlugin disabled");
-    }
-
-    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("deathcount")) {
             // Only allow players or console to run
@@ -150,5 +144,11 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
+        getLogger().info("TempBanPlugin disabled");
     }
 }
