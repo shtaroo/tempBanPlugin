@@ -117,7 +117,9 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
     private void showAllDeaths(CommandSender sender) {
         try {
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT playerName, deathCount FROM deaths");
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT playerName, deathCount FROM deaths ORDER BY deathCount DESC"
+            );
 
             sender.sendMessage("§8===== §cDeath Counts §8=====");
             while (rs.next()) {
