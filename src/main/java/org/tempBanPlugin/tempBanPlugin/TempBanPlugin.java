@@ -44,12 +44,13 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
             getLogger().info("Connected to SQLite database.");
 
             Statement stmt = connection.createStatement();
-            stmt.executeUpdate("create table if not exists deaths (" +
-                    "playerName string primary key," +
-                    "deathCount int default 0," +
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS deaths (" +
+                    "playerName TEXT PRIMARY KEY," +
+                    "deathCount INTEGER DEFAULT 0" +
                     ")"
             );
             stmt.close();
+
 
         } catch (Exception e) {
             e.printStackTrace();
