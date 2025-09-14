@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.Date;
 
@@ -19,6 +20,10 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         getLogger().info("TempBanPlugin enabled");
         Bukkit.broadcastMessage("TempBanPlugin is Enabled");
+        File dbDir = new File("/TempBanPlugin");
+        if (!dbDir.exists()) {
+            dbDir.mkdirs();
+        }
 
     }
 
