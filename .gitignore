@@ -44,3 +44,5 @@ logs/
 *.swo
 *.tmp
 *.bak
+/build/classes
+/build/tmp
