@@ -2,18 +2,18 @@ package org.tempBanPlugin.tempBanPlugin;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.Instant;
 import java.util.Date;
 
@@ -82,11 +82,59 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         Bukkit.broadcastMessage("§8==============================");
     }
 
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        String name = player.getName();
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT OR IGNORE INTO deaths (playerName, deathCount) VALUES (?, 0)"
+            );
+            ps.setString(1, name);
+            ps.executeUpdate();
+            ps.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onDisable() {
         // Plugin shutdown logic
         getLogger().info("TempBanPlugin disabled");
     }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("deathcount")) {
+            // Only allow players or console to run
+            showAllDeaths(sender);
+            return true;
+        }
+        return false;
+    }
+
+    private void showAllDeaths(CommandSender sender) {
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT playerName, deathCount FROM deaths");
+
+            sender.sendMessage("§8===== §cDeath Counts §8=====");
+            while (rs.next()) {
+                String playerName = rs.getString("playerName");
+                int deathCount = rs.getInt("deathCount");
+                sender.sendMessage("§6" + playerName + ": §c" + deathCount);
+            }
+            sender.sendMessage("§8========================");
+
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            sender.sendMessage("§4Failed to fetch death counts.");
+            e.printStackTrace();
+        }
+    }
+
 
     void addDeathToDB(String playerName) {
         try {

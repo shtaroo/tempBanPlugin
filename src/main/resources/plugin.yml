@@ -5,3 +5,7 @@ api-version: '1.21'
 authors: [ Crasyman2 and vincentjm12 ]
 description: This plugin creates a temporary ban for all players who die.
 
+commands:
+  deathcount:
+    description: Shows all player death counts
+    usage: /deathcount
