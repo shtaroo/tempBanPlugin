@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.Date;
@@ -44,8 +45,8 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
 
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("create table if not exists deaths (" +
-                    "player string primary key," +
-                    "deaths int," +
+                    "playerName string primary key," +
+                    "deathCount int default 0," +
                     ")"
             );
             stmt.close();
@@ -67,6 +68,8 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         Bukkit.getBanList(BanList.Type.PROFILE)
                 .addBan(player.getName(), reason, expiry, getName());
 
+        // add death to db
+        addDeathToDB(player.getName());
 
         player.kickPlayer("§4§l☠ YOU DIED! ☠ §7You've been set on a §c24 hour §7cooldown.");
 
@@ -84,4 +87,17 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         getLogger().info("TempBanPlugin disabled");
     }
 
+    void addDeathToDB(String playerName) {
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    "insert into deaths (playerName, deathCount) values (?,1) " +
+                            "on conflict(playerName) do update set deathCount = deathCount + 1"
+            );
+            ps.setString(1, playerName);
+            ps.executeUpdate();
+            ps.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
