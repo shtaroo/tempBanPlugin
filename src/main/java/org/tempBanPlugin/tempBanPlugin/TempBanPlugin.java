@@ -1,14 +1,16 @@
 package org.tempBanPlugin.tempBanPlugin;
 
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -66,6 +68,13 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         String reason = "§e⚠ §6You've recently died. §7You've been set on a §c12 hour §7cooldown.";
         event.setDeathMessage(null);
 
+        Location deathlocation = event.getEntity().getLocation();
+        World world = deathlocation.getWorld();
+
+        if (world != null) {
+            world.strikeLightningEffect(deathlocation);
+        }
+
         Bukkit.getBanList(BanList.Type.PROFILE)
                 .addBan(player.getName(), reason, expiry, getName());
 
@@ -80,6 +89,31 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
             Bukkit.broadcastMessage("§7Cause: §f" + deathMessage);
         }
         Bukkit.broadcastMessage("§8==============================");
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        player.getInventory().clear();
+        Location respawnLocation = event.getRespawnLocation();
+
+        Firework firework = player.getWorld().spawn(respawnLocation, Firework.class);
+        FireworkMeta meta = firework.getFireworkMeta();
+
+        meta.addEffect(
+                FireworkEffect.builder()
+                        .withColor(Color.AQUA)
+                        .withFade(Color.FUCHSIA)
+                        .with(FireworkEffect.Type.BALL_LARGE)
+                        .trail(true)
+                        .flicker(true)
+                        .build()
+        );
+        meta.setPower(1); // how high it flies
+        firework.setFireworkMeta(meta);
+
+        // Optional: detonate instantly so it explodes right on respawn
+        getServer().getScheduler().runTaskLater(this, firework::detonate, 2L);
     }
 
     @EventHandler
