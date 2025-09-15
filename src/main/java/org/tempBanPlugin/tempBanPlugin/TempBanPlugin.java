@@ -61,9 +61,9 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         String deathMessage = event.getDeathMessage();
-        long seconds = 24L * 60 * 60;
+        long seconds = 12L * 60 * 60;
         Date expiry = Date.from(Instant.now().plusSeconds(seconds));
-        String reason = "§e⚠ §6You've recently died. §7You've been set on a §c24 hour §7cooldown.";
+        String reason = "§e⚠ §6You've recently died. §7You've been set on a §c12 hour §7cooldown.";
         event.setDeathMessage(null);
 
         Bukkit.getBanList(BanList.Type.PROFILE)
@@ -72,7 +72,7 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
         // add death to db
         addDeathToDB(player.getName());
 
-        player.kickPlayer("§4§l☠ YOU DIED! ☠ §7You've been set on a §c24 hour §7cooldown.");
+        player.kickPlayer("§4§l☠ YOU DIED! ☠ §7You've been set on a §c12 hour §7cooldown.");
 
         Bukkit.broadcastMessage("§8==============================");
         Bukkit.broadcastMessage("§c§lBAN ALERT §8» §6" + player.getName() + " §7has died§7!");
