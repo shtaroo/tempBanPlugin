@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.event.player.PlayerRespawnEvent.RespawnReason;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +95,9 @@ public final class TempBanPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        player.getInventory().clear();
+        if (event.getRespawnReason() == RespawnReason.DEATH) {
+            player.getInventory().clear();
+        }
         Location respawnLocation = event.getRespawnLocation();
 
         Firework firework = player.getWorld().spawn(respawnLocation, Firework.class);
